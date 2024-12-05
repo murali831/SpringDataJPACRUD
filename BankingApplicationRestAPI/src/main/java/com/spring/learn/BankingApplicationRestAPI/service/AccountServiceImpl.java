@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.learn.BankingApplicationRestAPI.controller.exception.AccountException;
+import com.spring.learn.BankingApplicationRestAPI.controller.exception.AccountNotHavingMinimumBalanceException;
 import com.spring.learn.BankingApplicationRestAPI.dto.AccountDTO;
 import com.spring.learn.BankingApplicationRestAPI.entity.Account;
 import com.spring.learn.BankingApplicationRestAPI.mapper.AccountMapper;
@@ -27,14 +29,14 @@ public class AccountServiceImpl implements AccountService{
 
 	@Override
 	public AccountDTO getAccountInfo(long id) {
-	    Account account = accountRepo.findById(id).orElseThrow(()->new RuntimeException("Account doesn't exists"));
+	    Account account = accountRepo.findById(id).orElseThrow(()->new AccountException("Account doesn't exists"));
 	    AccountDTO accountDTO = AccountMapper.mapToAccountDTO(account);
 		return accountDTO;
 	}
 
 	@Override
 	public AccountDTO depositAmount(long id, double depositAmount) {
-		Account account = accountRepo.findById(id).orElseThrow(()->new RuntimeException("Account doesn't exists"));
+		Account account = accountRepo.findById(id).orElseThrow(()->new AccountException("Account doesn't exists"));
 		double totalAmount = account.getBalance()+ depositAmount;
 		account.setBalance(totalAmount);
 		Account savedAccount =  accountRepo.save(account);
@@ -42,10 +44,10 @@ public class AccountServiceImpl implements AccountService{
 	}
 
 	@Override
-	public AccountDTO withdrawAmount(long id, double withdrawAmount) {
-		Account account = accountRepo.findById(id).orElseThrow(()->new RuntimeException("Account doesn't exists"));
+	public AccountDTO withdrawAmount(long id, double withdrawAmount) throws AccountNotHavingMinimumBalanceException {
+		Account account = accountRepo.findById(id).orElseThrow(()->new AccountException("Account doesn't exists"));
 		if(account.getBalance()<withdrawAmount)
-			throw new RuntimeException("Withdraw amount is more than the current balance");
+			throw new AccountNotHavingMinimumBalanceException("Withdraw amount is more than the current balance");
 		double totalAmount = account.getBalance() - withdrawAmount;
 		account.setBalance(totalAmount);
 		Account savedAccount =  accountRepo.save(account);
@@ -60,7 +62,7 @@ public class AccountServiceImpl implements AccountService{
 
 	@Override
 	public void deleteAccount(long id) {
-		Account account = accountRepo.findById(id).orElseThrow(()->new RuntimeException("Account doesn't exists"));
+		Account account = accountRepo.findById(id).orElseThrow(()->new AccountException("Account doesn't exists"));
 		accountRepo.deleteById(id);
 	}
 

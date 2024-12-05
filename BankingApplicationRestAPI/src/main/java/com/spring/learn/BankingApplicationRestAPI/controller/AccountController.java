@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.spring.learn.BankingApplicationRestAPI.controller.exception.AccountNotHavingMinimumBalanceException;
 import com.spring.learn.BankingApplicationRestAPI.dto.AccountDTO;
 import com.spring.learn.BankingApplicationRestAPI.service.AccountService;
 
@@ -43,7 +44,7 @@ public class AccountController {
 	}
 	
 	@PutMapping("/{id}/withdraw")
-	public ResponseEntity<AccountDTO> withdraw(@PathVariable long id, @RequestBody Map<String,Double> request){
+	public ResponseEntity<AccountDTO> withdraw(@PathVariable long id, @RequestBody Map<String,Double> request) throws AccountNotHavingMinimumBalanceException{
 		double withdrawAmount  = request.get("Amount"); 
 		AccountDTO accountDto = accountService.withdrawAmount(id,withdrawAmount);
 		return ResponseEntity.ok(accountDto);
